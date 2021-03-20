@@ -14,5 +14,5 @@ output "alb_route53_dns_name" {
 }
 
 output "alb_arn" {
-  value = aws_alb.alb.arn
+  value = aws_alb.alb[0].arn
 }
