@@ -3,58 +3,13 @@ data "aws_vpc" "selected" {
   id    = var.vpc_id
 }
 
-resource "aws_security_group" "security_group_alb" {
-  // Only enable if LB is required
-  count = var.enable_alb ? 1 : 0
-
-  name_prefix = "${var.environment}-${var.service_name}"
-  vpc_id      = var.vpc_id
-
-  # allow all incoming traffic
-  ingress {
-    from_port   = var.alb_port
-    to_port     = var.alb_port
-    protocol    = "tcp"
-    cidr_blocks = [var.internal_alb ? data.aws_vpc.selected[0].cidr_block : "0.0.0.0/0"]
-  }
-
-  # allow all outgoing traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [data.aws_vpc.selected[0].cidr_block]
-  }
-
-  tags = merge(
-    {
-      "Name" = format("%s", "${var.environment}-${var.service_name}")
-    },
-    {
-      "Environment" = format("%s", var.environment)
-    },
-    {
-      "Project" = format("%s", var.project)
-    },
-    {
-      "Application" = format("%s", var.service_name)
-    },
-    var.tags,
-  )
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_alb" "alb" {
   // Only enable if LB is required
   count = var.enable_alb ? 1 : 0
 
   internal        = var.internal_alb
-  security_groups = [aws_security_group.security_group_alb[0].id]
   subnets         = var.subnet_ids
-  load_balancer_type = var.internal_alb ? "network" : "application"
+  load_balancer_type = "network"
 
   idle_timeout = var.alb_timeout
 
