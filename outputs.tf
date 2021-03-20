@@ -13,3 +13,6 @@ output "alb_route53_dns_name" {
   value       = element(concat(aws_route53_record.dns_record.*.name, [""]), 0)
 }
 
+output "alb_arn" {
+  value = aws_alb.alb.arn
+}
