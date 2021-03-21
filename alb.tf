@@ -37,6 +37,8 @@ resource "aws_alb_target_group" "target_group" {
 
   port     = var.alb_container_port
   protocol = var.container_ssl_enabled ? "HTTPS" : "HTTP"
+  
+  protocol          = var.alb_protocol
   vpc_id   = var.vpc_id
 
   target_type = var.launch_type == "FARGATE" ? "ip" : "instance"
