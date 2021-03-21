@@ -41,6 +41,10 @@ resource "aws_alb_target_group" "target_group" {
   vpc_id   = var.vpc_id
 
   target_type = var.launch_type == "FARGATE" ? "ip" : "instance"
+  stickiness {
+    enabled = false
+    type = "lb_cookie"
+}
 
   dynamic "health_check" {
     for_each = [merge(
