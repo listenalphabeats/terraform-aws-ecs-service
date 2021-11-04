@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "task" {
 }
 
 locals {
-  target_group_arn = var.target_group_arn == "" ? element(concat(aws_alb_target_group.target_group.*.arn, [""]), 0) : var.target_group_arn
+  target_group_arn = var.target_group_arn
 }
 
 resource "null_resource" "ecs_services_dependencies" {
@@ -54,9 +54,9 @@ resource "aws_ecs_service" "service_alb" {
   count = var.enable_target_group_connection || var.enable_alb || var.enable_load_balanced ? 1 : 0
   depends_on = [
     null_resource.ecs_services_dependencies,
-    aws_alb_listener.listener,
-    aws_alb_target_group.target_group,
-    aws_lb_listener_rule.default,
+    # aws_alb_listener.listener,
+    # aws_alb_target_group.target_group,
+    # aws_lb_listener_rule.default,
   ]
 
   name            = "${var.environment}-${var.service_name}"
@@ -76,7 +76,7 @@ resource "aws_ecs_service" "service_alb" {
   launch_type = var.launch_type
 
   dynamic "network_configuration" {
-    for_each = var.launch_type == "FARGATE" ? list(var.launch_type) : []
+    for_each = var.launch_type == "FARGATE" ? tolist([var.launch_type]) : []
     content {
       security_groups = var.awsvpc_service_security_groups
       subnets         = var.awsvpc_service_subnetids
@@ -95,7 +95,7 @@ resource "aws_ecs_service" "service" {
   launch_type     = var.launch_type
 
   dynamic "network_configuration" {
-    for_each = var.launch_type == "FARGATE" ? list(var.launch_type) : []
+    for_each = var.launch_type == "FARGATE" ? tolist([var.launch_type]) : []
     content {
       security_groups = var.awsvpc_service_security_groups
       subnets         = var.awsvpc_service_subnetids
